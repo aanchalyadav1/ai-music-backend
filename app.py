@@ -32,13 +32,12 @@ db = firestore.client()  # Firestore database connection
 # -----------------------------
 # 3️⃣ Spotify API Setup
 # -----------------------------
-# Correct: Use the ENV VARIABLE NAME, NOT the key itself
 SPOTIFY_CLIENT_ID = os.environ.get("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.environ.get("SPOTIFY_CLIENT_SECRET")
 
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
-    client_id=fb79f67e486247c4b8a0308d1c482646,
-    client_secret=cce4a58dcb5e43b392861a8d20b89a1d
+    client_id=SPOTIFY_CLIENT_ID,
+    client_secret=SPOTIFY_CLIENT_SECRET
 ))
 
 # -----------------------------
