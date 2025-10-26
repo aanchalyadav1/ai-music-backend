@@ -28,15 +28,6 @@ emotion_labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Neutral', 'Sad', 'Surpri
 cred = credentials.Certificate("firebaseConfig.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()  # Firestore database connection
-import firebase_admin
-from firebase_admin import credentials, firestore
-
-# Path to the secret JSON file in Render
-cred = credentials.Certificate("/run/secrets/firebaseConfig.json")
-firebase_admin.initialize_app(cred)
-
-db = firestore.client()
-
 
 # -----------------------------
 # 3️⃣ Spotify API Setup
@@ -154,6 +145,6 @@ def health():
 
 import os
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
 
