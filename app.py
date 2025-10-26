@@ -28,6 +28,15 @@ emotion_labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Neutral', 'Sad', 'Surpri
 cred = credentials.Certificate("firebaseConfig.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()  # Firestore database connection
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+# Path to the secret JSON file in Render
+cred = credentials.Certificate("/run/secrets/firebaseConfig.json")
+firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+
 
 # -----------------------------
 # 3️⃣ Spotify API Setup
