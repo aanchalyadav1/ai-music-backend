@@ -1,7 +1,0 @@
-Flask
-tensorflow
-firebase-admin
-spotipy
-opencv-python
-flask-cors
-gunicorn
