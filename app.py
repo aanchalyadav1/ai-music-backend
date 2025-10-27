@@ -1,5 +1,5 @@
 # ==========================
-# app.py — Flask Backend (Final)
+# app.py — Flask Backend (Final Corrected)
 # ==========================
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 # 1️⃣ App Configuration
 # -----------------------------
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})  # Allow frontend access
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # -----------------------------
 # 2️⃣ Load Environment Variables
@@ -31,18 +31,28 @@ SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 # 3️⃣ Load Emotion Detection Model
 # -----------------------------
 MODEL_PATH = "emotion_model.keras"
-model = tf.keras.models.load_model(MODEL_PATH)
+try:
+    model = tf.keras.models.load_model(MODEL_PATH)
+    print("✅ Emotion detection model loaded successfully.")
+except Exception as e:
+    print("⚠️ Failed to load emotion model:", e)
+
 emotion_labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Neutral', 'Sad', 'Surprise']
 
 # -----------------------------
 # 4️⃣ Firebase Initialization
 # -----------------------------
-cred = credentials.Certificate("firebaseConfig.json")
-firebase_admin.initialize_app(cred)
-db = firestore.client()
+try:
+    cred = credentials.Certificate("firebaseConfig.json")
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
+    print("✅ Firebase initialized successfully.")
+except Exception as e:
+    print("⚠️ Firebase initialization failed:", e)
+    db = None
 
 # -----------------------------
-# 5️⃣ Spotify API Configuration
+# 5️⃣ Spotify Configuration
 # -----------------------------
 if not SPOTIFY_CLIENT_ID or not SPOTIFY_CLIENT_SECRET:
     raise Exception("⚠️ Spotify credentials missing in .env file!")
@@ -64,20 +74,36 @@ def home():
 @app.route("/detect", methods=["POST"])
 def detect_emotion():
     try:
-        file = request.files.get("image")
-        if not file:
+        # Check if image was uploaded
+        if "image" not in request.files:
+            print("❌ No file found in request.files")
             return jsonify({"success": False, "error": "No image uploaded"}), 400
 
-        img = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_GRAYSCALE)
+        file = request.files["image"]
+        filename = file.filename or "uploaded_image.jpg"
+
+        # Temporary save (Render allows /tmp/)
+        os.makedirs("/tmp/uploads", exist_ok=True)
+        temp_path = os.path.join("/tmp/uploads", filename)
+        file.save(temp_path)
+        print(f"✅ File saved temporarily: {temp_path}")
+
+        # Read and preprocess image
+        img = cv2.imread(temp_path, cv2.IMREAD_GRAYSCALE)
+        if img is None:
+            return jsonify({"success": False, "error": "Invalid image format"}), 400
+
         img = cv2.resize(img, (48, 48)) / 255.0
         img = np.expand_dims(img.reshape(48, 48, 1), axis=0)
 
         pred = model.predict(img)
         emotion = emotion_labels[np.argmax(pred)]
 
+        print(f"🎭 Detected Emotion: {emotion}")
         return jsonify({"success": True, "emotion": emotion})
 
     except Exception as e:
+        print("🔥 Error in /detect:", e)
         return jsonify({"success": False, "error": str(e)}), 500
 
 
@@ -109,6 +135,7 @@ def recommend_music():
         return jsonify({"success": True, "songs": tracks})
 
     except Exception as e:
+        print("🔥 Error in /recommend:", e)
         return jsonify({"success": False, "error": str(e)}), 500
 
 
@@ -129,6 +156,7 @@ def signup():
         return jsonify({"success": True, "uid": user.uid, "message": "Signup successful"})
 
     except Exception as e:
+        print("🔥 Error in /signup:", e)
         return jsonify({"success": False, "error": str(e)}), 500
 
 
@@ -143,6 +171,7 @@ def forgot_password():
         return jsonify({"success": True, "link": link})
 
     except Exception as e:
+        print("🔥 Error in /forgot-password:", e)
         return jsonify({"success": False, "error": str(e)}), 500
 
 
